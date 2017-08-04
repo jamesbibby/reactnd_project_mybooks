@@ -4,25 +4,22 @@ import SearchBooks from './SearchBooks'
 import Bookshelf from './Bookshelf'
 import { Route } from 'react-router-dom'
 import './App.css'
-import terms from './SearchTerms'
-
-const initialState = {
-	bookMap: {},
-	currentlyReading: [],
-	read: [],
-	wantToRead: [],
-}
 
 class BooksApp extends React.Component {
 	// this way we can always go back to an initial state when reducing the getAll() result
+	initialState = {
+		bookMap: {},
+		currentlyReading: [],
+		read: [],
+		wantToRead: [],
+	}
 
-	state = initialState
-
+	state = this.initialState
 	componentDidMount() {
 		BooksAPI.getAll().then(books => {
 			// Organize the books into a map (id:object) to allow constant time lookups
 			// store the shelf contents as ids, the detailed object can be retreived from the map if needed
-			const state = books.reduce((state, book) => {
+			const myState = books.reduce((state, book) => {
 				state.bookMap[book.id] = book
 				switch (book.shelf) {
 					case 'wantToRead':
@@ -38,8 +35,7 @@ class BooksApp extends React.Component {
 				}
 				return state
 			}, this.initialState)
-			this.setState(state)
-			console.log(state)
+			this.setState(myState)
 		})
 	}
 

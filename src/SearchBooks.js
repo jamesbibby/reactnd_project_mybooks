@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import Terms from './SearchTerms'
+import Autocomplete from 'react-autocomplete'
 
 class SearchBooks extends Component {
 	static propTypes = {
@@ -8,10 +10,6 @@ class SearchBooks extends Component {
 
 	state = {
 		query: '',
-	}
-
-	handleChange = event => {
-		this.setState({ query: event.target.value })
 	}
 
 	render() {
@@ -23,10 +21,23 @@ class SearchBooks extends Component {
 						Close
 					</a>
 					<div className="search-books-input-wrapper">
-						<input
-							type="text"
-							onChange={this.handleChange}
-							placeholder="Search by title or author"
+						<Autocomplete
+							value={this.state.query}
+							inputProps={{ placeholder: 'Search by title or author' }}
+							items={Terms.map(term => ({
+								label: term,
+							}))}
+							getItemValue={item => item.label}
+							shouldItemRender={(item, value) =>
+								item.label.toLowerCase().indexOf(value.toLowerCase()) !== -1}
+							onChange={(event, value) => this.setState({ query: value })}
+							onSelect={value => this.setState({ query: value })}
+							renderItem={(item, isHighlighted) =>
+								<div
+									style={{ background: isHighlighted ? 'lightgray' : 'white' }}
+								>
+									{item.label}
+								</div>}
 						/>
 					</div>
 				</div>
