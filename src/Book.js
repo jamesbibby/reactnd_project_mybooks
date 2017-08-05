@@ -2,22 +2,24 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 const Book = props => {
-	const { book, onShelfChange } = props
+	const { book, onShelfChange, currentShelf } = props
 	return (
 		<li>
 			<div className="book">
 				<div className="book-top">
-					<div
-						className="book-cover"
-						style={{
-							width: 128,
-							height: 193,
-							backgroundImage: `url(${book.imageLinks.smallThumbnail})`,
-						}}
-					/>
+					{book.imageLinks &&
+						book.imageLinks.smallThumbnail &&
+						<div
+							className="book-cover"
+							style={{
+								width: 128,
+								height: 193,
+								backgroundImage: `url(${book.imageLinks.smallThumbnail})`,
+							}}
+						/>}
 					<div className="book-shelf-changer">
 						<select
-							defaultValue={book.shelf}
+							defaultValue={currentShelf}
 							onChange={event => onShelfChange(book, event.target.value)}
 						>
 							<option value="none" disabled>
@@ -33,11 +35,12 @@ const Book = props => {
 				<div className="book-title">
 					{book.title}
 				</div>
-				{book.authors.map(author =>
-					<div className="book-authors" key={author}>
-						{author}
-					</div>
-				)}
+				{book.authors &&
+					book.authors.map(author =>
+						<div className="book-authors" key={author}>
+							{author}
+						</div>
+					)}
 			</div>
 		</li>
 	)
@@ -46,6 +49,7 @@ const Book = props => {
 Book.propTypes = {
 	book: PropTypes.object.isRequired,
 	onShelfChange: PropTypes.func.isRequired,
+	currentShelf: PropTypes.string.isRequired,
 }
 
 export default Book

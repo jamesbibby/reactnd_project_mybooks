@@ -8,6 +8,7 @@ import './App.css'
 class BooksApp extends React.Component {
 	// this way we can always go back to an initial state when reducing the getAll() result
 	initialState = {
+		searchResults: [],
 		bookMap: {},
 		currentlyReading: [],
 		read: [],
@@ -26,17 +27,52 @@ class BooksApp extends React.Component {
 						state.wantToRead.push(book.id)
 						break
 					case 'currentlyReading':
-						console.log('state', state)
 						state.currentlyReading.push(book.id)
 						break
 					case 'read':
 						state.read.push(book.id)
+						break
+					default:
 						break
 				}
 				return state
 			}, this.initialState)
 			this.setState(myState)
 		})
+	}
+
+	getCurrentShelf = (id, name) => {
+		let shelf
+		if (this.state.read.includes(id)) {
+			shelf = 'read'
+		} else if (this.state.currentlyReading.includes(id)) {
+			shelf = 'currentlyReading'
+		} else if (this.state.wantToRead.includes(id)) {
+			shelf = 'wantToRead'
+		} else {
+			shelf = 'none'
+		}
+		return shelf
+	}
+
+	onSearch = term => {
+		BooksAPI.search(term).then(books => {
+			// there are duplicates in the results so we need to filter
+			// I am using a set of ids to track books that have been seen already
+			const uniqueIds = new Set()
+			const uniqueBooks = books.filter(book => {
+				if (uniqueIds.has(book.id)) {
+					return false
+				}
+				uniqueIds.add(book.id)
+				return true
+			})
+			this.setState({ searchResults: uniqueBooks })
+		})
+	}
+
+	clearSearchResults = () => {
+		this.setState({ searchResults: [] })
 	}
 
 	// When the shelf changes we can directly update the id list of books on each shelf
@@ -46,7 +82,17 @@ class BooksApp extends React.Component {
 		BooksAPI.update(book, shelf).then(results => {
 			this.setState(state => {
 				const bookMap = { ...state.bookMap }
-				bookMap[book.id].shelf = shelf
+				if (bookMap[book.id]) {
+					bookMap[book.id].shelf = shelf
+				} else {
+					BooksAPI.get(book.id).then(book => {
+						this.setState(state => {
+							bookMap[book.id] = book
+							return { bookMap }
+						})
+					})
+				}
+
 				return { ...results, bookMap }
 			})
 		})
@@ -57,7 +103,15 @@ class BooksApp extends React.Component {
 			<div className="app">
 				<Route
 					path="/search"
-					render={({ history }) => <SearchBooks history={history} />}
+					render={({ history }) =>
+						<SearchBooks
+							history={history}
+							books={this.state.searchResults}
+							clearSearchResults={this.clearSearchResults}
+							onSearch={this.onSearch}
+							onShelfChange={this.onShelfChange}
+							getCurrentShelf={this.getCurrentShelf}
+						/>}
 				/>
 				<Route
 					exact

@@ -10,7 +10,6 @@ class Bookshelf extends Component {
 	}
 	render() {
 		const { title, books, onShelfChange } = this.props
-		console.log('books', books)
 		return (
 			<div className="bookshelf">
 				<h2 className="bookshelf-title">
@@ -19,7 +18,12 @@ class Bookshelf extends Component {
 				<div className="bookshelf-books">
 					<ol className="books-grid">
 						{books.map(book =>
-							<Book key={book.id} onShelfChange={onShelfChange} book={book} />
+							<Book
+								key={book.id}
+								onShelfChange={onShelfChange}
+								book={book}
+								currentShelf={book.shelf}
+							/>
 						)}
 					</ol>
 				</div>
