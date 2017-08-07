@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+// Renders a single book
 const Book = props => {
-	const { book, onShelfChange, currentShelf } = props
+	const { book, showIcon, onShelfChange } = props
 	return (
 		<li>
 			<div className="book">
@@ -16,10 +17,12 @@ const Book = props => {
 								height: 193,
 								backgroundImage: `url(${book.imageLinks.smallThumbnail})`,
 							}}
-						/>}
+						>
+							<i className={showIcon && `book-icon icon-${book.shelf}`} />
+						</div>}
 					<div className="book-shelf-changer">
 						<select
-							defaultValue={currentShelf}
+							defaultValue={book.shelf}
 							onChange={event => onShelfChange(book, event.target.value)}
 						>
 							<option value="none" disabled>
@@ -48,8 +51,8 @@ const Book = props => {
 
 Book.propTypes = {
 	book: PropTypes.object.isRequired,
+	showIcon: PropTypes.bool.isRequired,
 	onShelfChange: PropTypes.func.isRequired,
-	currentShelf: PropTypes.string.isRequired,
 }
 
 export default Book

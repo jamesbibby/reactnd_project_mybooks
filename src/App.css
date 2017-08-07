@@ -41,7 +41,52 @@ body,
 
 .bookshelf-title {
 	border-bottom: 1px solid #dedede;
+	padding-left: 35px;
 }
+
+.bookshelf-title-text {
+	padding-left: 10px;
+}
+
+.title-icon {
+	display: inline-block;
+	width: 28px;
+	height: 28px;
+	background-color: white;
+	background-position: bottom;
+	background-repeat: no-repeat;
+	background-size: 28px;
+	vertical-align: middle;
+}
+
+.book-icon {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	background-color: whitesmoke;
+	border-width: 2px;
+	border-color: darkgrey;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 28px;
+}
+
+.icon-read {
+	background-image: url('./icons/check-mark.svg');
+}
+
+.icon-currentlyReading {
+	background-image: url('./icons/book.svg');
+}
+
+.icon-wantToRead {
+	background-image: url('./icons/binoculars.svg');
+}
+
+.icon-none {
+	visibility: hidden;
+}
+
 .bookshelf-books {
 	text-align: center;
 }

@@ -9,7 +9,8 @@ class SearchBooks extends Component {
 		history: PropTypes.object.isRequired,
 		onSearch: PropTypes.func.isRequired,
 		clearSearchResults: PropTypes.func.isRequired,
-		books: PropTypes.array.isRequired,
+		searchResults: PropTypes.array.isRequired,
+		searchResultsMessage: PropTypes.string,
 		onShelfChange: PropTypes.func.isRequired,
 		getCurrentShelf: PropTypes.func.isRequired,
 	}
@@ -20,6 +21,7 @@ class SearchBooks extends Component {
 
 	handleChange = (event, value) => {
 		this.setState({ query: value })
+		this.props.onSearch(value)
 	}
 
 	handleSelect = value => {
@@ -27,12 +29,17 @@ class SearchBooks extends Component {
 		this.props.onSearch(value)
 	}
 
+	componentDidMount() {
+		this.input.focus() // autofocus on the text input box
+	}
+
 	render() {
 		const {
 			history,
 			clearSearchResults,
 			onShelfChange,
-			books,
+			searchResults,
+			searchResultsMessage,
 			getCurrentShelf,
 		} = this.props
 		return (
@@ -48,6 +55,10 @@ class SearchBooks extends Component {
 						Close
 					</a>
 					<div className="search-books-input-wrapper">
+						{
+							// https://github.com/reactjs/react-autocomplete Autocompleting text
+							// box based on the terms available to the API
+						}
 						<Autocomplete
 							value={this.state.query}
 							inputProps={{ placeholder: 'Search by title or author' }}
@@ -60,6 +71,7 @@ class SearchBooks extends Component {
 								item.label.toLowerCase().indexOf(value.toLowerCase()) !== -1}
 							onChange={this.handleChange}
 							onSelect={this.handleSelect}
+							ref={el => (this.input = el)}
 							renderItem={(item, isHighlighted) =>
 								<div
 									style={{ background: isHighlighted ? 'lightgray' : 'white' }}
@@ -70,14 +82,21 @@ class SearchBooks extends Component {
 					</div>
 				</div>
 				<div className="search-books-results">
+					<p>
+						{searchResultsMessage}
+					</p>
 					<ol className="books-grid">
-						{books.map(book => {
+						{searchResults.map(book => {
+							const shelf = getCurrentShelf(book.id, book.title)
 							return (
 								<Book
 									key={book.id}
 									onShelfChange={onShelfChange}
-									book={book}
-									currentShelf={getCurrentShelf(book.id, book.title)}
+									showIcon={true}
+									book={{
+										...book,
+										shelf: shelf, // override the shelf, search results are not accurate for this field
+									}}
 								/>
 							)
 						})}

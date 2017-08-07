@@ -1,7 +1,7 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import SearchBooks from './SearchBooks'
-import Bookshelf from './Bookshelf'
+import BookshelfGrid from './BookshelfGrid'
 import { Route } from 'react-router-dom'
 import './App.css'
 
@@ -9,13 +9,17 @@ class BooksApp extends React.Component {
 	// this way we can always go back to an initial state when reducing the getAll() result
 	initialState = {
 		searchResults: [],
+		searchResultsMessage: 'Search for books to add to your shelves!',
 		bookMap: {},
 		currentlyReading: [],
 		read: [],
 		wantToRead: [],
 	}
 
+	// set the state to initial state on load
 	state = this.initialState
+
+	// when the component mounts for the first time, retrieve the book list and categorize them
 	componentDidMount() {
 		BooksAPI.getAll().then(books => {
 			// Organize the books into a map (id:object) to allow constant time lookups
@@ -41,24 +45,27 @@ class BooksApp extends React.Component {
 		})
 	}
 
-	getCurrentShelf = (id, name) => {
-		let shelf
-		if (this.state.read.includes(id)) {
-			shelf = 'read'
-		} else if (this.state.currentlyReading.includes(id)) {
-			shelf = 'currentlyReading'
-		} else if (this.state.wantToRead.includes(id)) {
-			shelf = 'wantToRead'
-		} else {
-			shelf = 'none'
-		}
-		return shelf
+	// Check if this id is in any of our shelves
+	getCurrentShelf = id => {
+		return this.state.read.includes(id)
+			? 'read'
+			: this.state.currentlyReading.includes(id)
+				? 'currentlyReading'
+				: this.state.wantToRead.includes(id) ? 'wantToRead' : 'none'
 	}
 
 	onSearch = term => {
+		// Retrieve the search results from the BooksAPI,
+		// filter them for unique entries and set the state
 		BooksAPI.search(term).then(books => {
+			if (!books || books.error || books.length === 0) {
+				this.setState({
+					searchResults: [],
+					searchResultsMessage: `No results found for ${term}`,
+				})
+				return
+			}
 			// there are duplicates in the results so we need to filter
-			// I am using a set of ids to track books that have been seen already
 			const uniqueIds = new Set()
 			const uniqueBooks = books.filter(book => {
 				if (uniqueIds.has(book.id)) {
@@ -67,12 +74,19 @@ class BooksApp extends React.Component {
 				uniqueIds.add(book.id)
 				return true
 			})
-			this.setState({ searchResults: uniqueBooks })
+			this.setState({
+				searchResults: uniqueBooks,
+				searchResultsMessage: `${books.length} results found for ${term}`,
+			})
 		})
 	}
 
+	// clear the search results, used when the user exist the search screen
 	clearSearchResults = () => {
-		this.setState({ searchResults: [] })
+		this.setState({
+			searchResults: this.initialState.searchResults,
+			searchResultsMessage: this.initialState.searchResultsMessage,
+		})
 	}
 
 	// When the shelf changes we can directly update the id list of books on each shelf
@@ -106,7 +120,8 @@ class BooksApp extends React.Component {
 					render={({ history }) =>
 						<SearchBooks
 							history={history}
-							books={this.state.searchResults}
+							searchResults={this.state.searchResults}
+							searchResultsMessage={this.state.searchResultsMessage}
 							clearSearchResults={this.clearSearchResults}
 							onSearch={this.onSearch}
 							onShelfChange={this.onShelfChange}
@@ -121,29 +136,13 @@ class BooksApp extends React.Component {
 							<div className="list-books-title">
 								<h1>MyReads</h1>
 							</div>
-							<div className="list-books-content">
-								<div>
-									<Bookshelf
-										title="Currently Reading"
-										books={this.state.currentlyReading.map(
-											id => this.state.bookMap[id]
-										)}
-										onShelfChange={this.onShelfChange}
-									/>
-									<Bookshelf
-										title="Want To Read"
-										books={this.state.wantToRead.map(
-											id => this.state.bookMap[id]
-										)}
-										onShelfChange={this.onShelfChange}
-									/>
-									<Bookshelf
-										title="Read"
-										books={this.state.read.map(id => this.state.bookMap[id])}
-										onShelfChange={this.onShelfChange}
-									/>
-								</div>
-							</div>
+							<BookshelfGrid
+								bookMap={this.state.bookMap}
+								onShelfChange={this.onShelfChange}
+								currentlyReading={this.state.currentlyReading}
+								read={this.state.read}
+								wantToRead={this.state.wantToRead}
+							/>
 							<div className="open-search">
 								<a onClick={() => history.push('/search')}>Add a book</a>
 							</div>
