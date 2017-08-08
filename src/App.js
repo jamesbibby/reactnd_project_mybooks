@@ -125,8 +125,7 @@ class BooksApp extends React.Component {
 						})
 					}
 					// show a small toast message when the book as changed shelves
-					// notify.show(`Succesfully moved book`, 'success', 2000)
-					notify.show(`Failed to move book`, 'error', 2000)
+					notify.show(`Succesfully moved book`, 'success', 2000)
 					return { ...results, bookMap }
 				})
 			})
