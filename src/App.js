@@ -68,7 +68,6 @@ class BooksApp extends React.Component {
 			.then(books => {
 				if (!books || books.error || books.length === 0) {
 					if (books && books.error) {
-						console.log(books)
 						notify.show('Invalid search term', 'error', 2000)
 					}
 					this.setState({
